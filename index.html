@@ -1,0 +1,1397 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>Jessie Math - 雞兔同籠邏輯實驗室</title>
+
+  <!-- ✅ 快取連結預覽（請放在 <head> 裡） -->
+  <!-- 控制預覽卡片那行文字（很多平台會抓這個） -->
+  <meta name="description" content="© 2025–2026 Jessie Math 捷析老師. All rights reserved.">
+
+  <!-- ✅ LINE / FB 預覽用 -->
+  <meta property="og:title" content="Jessie Math- 雞兔同籠邏輯實驗室">
+  <meta property="og:description" content="© 2025–2026 Jessie Math 捷析老師. All rights reserved.">
+  <meta property="og:type" content="website">
+
+  <!-- ✅ 預覽圖片（把檔名換成你的主題圖，例如 g6-u9-2.png） -->
+  <meta property="og:image" content="g6-u9-2.png">
+  <meta property="og:image:width" content="1024">
+  <meta property="og:image:height" content="1536">
+  <meta property="og:image:alt" content="Jessie Math 遊戲封面">
+
+  <!-- ✅ 有些平台會參考 -->
+  <link rel="image_src" href="g6-u9-2.png">
+
+  <!-- ✅ Twitter / X（可用同一張圖） -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Jessie Math">
+  <meta name="twitter:description" content="© 2025–2026 Jessie Math 捷析老師. All rights reserved.">
+  <meta name="twitter:image" content="g6-u9-2.png">
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --surface: rgba(255, 255, 255, 0.82);
+      --surface-border: rgba(255, 255, 255, 0.7);
+      --accent: #6366f1;
+      --accent-light: #818cf8;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --success: #10b981;
+      --error: #ef4444;
+      --radius-lg: 24px;
+      --radius-md: 16px;
+      --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+
+      --brand-yellow: #FFD700;
+
+      /* HUD */
+      --hudbar: #2f3f4f;
+      --hudbar-text: #ffffff;
+      --hudbar-chip: rgba(255,255,255,.14);
+      --hudbar-chip-bd: rgba(255,255,255,.18);
+    }
+
+    * { box-sizing: border-box; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
+
+    body {
+      margin: 0;
+      font-family: "Inter", "Noto Sans TC", sans-serif;
+      background-color: var(--bg);
+      background-image:
+        radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.06) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(16, 185, 129, 0.06) 0%, transparent 40%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ===== HERO ===== */
+    .hero-wrap{
+      width:100%;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: linear-gradient(180deg, rgba(248,250,252,0.85), rgba(248,250,252,0.60));
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(15,23,42,0.06);
+    }
+    .hero{
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 14px 20px;
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+    .hero-left{
+      display:flex;
+      align-items:center;
+      gap: 12px;
+      min-width: 230px;
+    }
+    .avatarRing{
+      width: 46px;
+      height: 46px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 35% 30%, #fff7c2, var(--brand-yellow) 55%, #d9a800 100%);
+      box-shadow: 0 10px 22px rgba(255, 215, 0, .25);
+      display:grid;
+      place-items:center;
+      flex: 0 0 auto;
+    }
+    .avatarRing img{
+      width: 40px;
+      height: 40px;
+      border-radius: 999px;
+      object-fit: contain;
+      display:block;
+    }
+    .heroBrand{
+      display:flex;
+      flex-direction: column;
+      gap: 2px;
+      line-height: 1.05;
+    }
+    .heroBrand .name{
+      font-weight: 900;
+      letter-spacing: -0.6px;
+      font-size: 1.25rem;
+      color: var(--text-main);
+    }
+    .heroBrand .sub{
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 700;
+      letter-spacing: 0.2px;
+    }
+    .hero-right{
+      display:flex;
+      align-items:center;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    .pillLink{
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      gap: 10px;
+      padding: 10px 18px;
+      border-radius: 999px;
+      border: 2px solid rgba(99,102,241,0.28);
+      background: #ffffff;
+      color: var(--text-main);
+      font-weight: 800;
+      font-size: 0.92rem;
+      box-shadow: var(--shadow);
+      white-space: nowrap;
+      user-select:none;
+    }
+    .pillLink i{
+      font-size: 1rem;
+      color: rgba(99,102,241,0.95);
+    }
+    .pillLink:hover{
+      transform: translateY(-2px);
+      background: rgba(99,102,241,0.06);
+      color: var(--accent);
+      border-color: rgba(99,102,241,0.45);
+    }
+    .pillLink:active{ transform: translateY(-1px); }
+
+    /* ===== Main ===== */
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 18px 20px 40px;
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 18px;
+    }
+
+    .card {
+      background: var(--surface);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius-lg);
+      padding: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    /* ===== 題目長條 ===== */
+    .hudBar{
+      background: var(--hudbar);
+      color: var(--hudbar-text);
+      border-radius: 18px;
+      padding: 14px 16px;
+      display:grid;
+      grid-template-columns: auto auto auto;
+      align-items:center;
+      justify-content: space-between;
+      gap: 12px;
+      box-shadow: 0 14px 30px rgba(0,0,0,.08);
+      margin-bottom: 14px;
+    }
+    .hudItem{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      font-weight: 900;
+      letter-spacing: .2px;
+      white-space: nowrap;
+    }
+    .hudIcon{
+      width: 34px; height: 34px;
+      border-radius: 999px;
+      display:grid; place-items:center;
+      background: var(--hudbar-chip);
+      border: 1px solid var(--hudbar-chip-bd);
+      flex: 0 0 auto;
+    }
+    .hudVal{
+      font-size: 1.05rem;
+      font-weight: 1000;
+    }
+    .hudSmall{
+      opacity: .9;
+      font-weight: 900;
+    }
+    @media (max-width: 760px){
+      .hudBar{ grid-template-columns: 1fr; }
+      .hudItem{ justify-content: center; }
+    }
+
+    .questionPanel{
+      background: rgba(255,255,255,0.78);
+      border: 1px solid rgba(15,23,42,0.06);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+    }
+    .qTitle{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      font-size: 1.15rem;
+      font-weight: 1000;
+      letter-spacing: -.2px;
+      margin: 0 0 10px;
+    }
+    .story-text {
+      background: rgba(255,255,255,0.55);
+      padding: 16px;
+      border-radius: var(--radius-md);
+      line-height: 1.8;
+      border: 1px solid rgba(0,0,0,0.02);
+      margin: 0 0 12px;
+    }
+    .k { color: var(--accent); font-weight: 900; border-bottom: 2px solid rgba(99,102,241,0.22); }
+
+    .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .stat-box {
+      background: white;
+      padding: 12px;
+      border-radius: var(--radius-md);
+      text-align: center;
+      border: 1px solid rgba(0,0,0,0.03);
+    }
+    .stat-box label { font-size: 0.75rem; color: var(--text-muted); font-weight: 900; display: block; margin-bottom: 6px; }
+    .stat-box span { font-size: 1.25rem; font-weight: 1000; color: var(--text-main); }
+
+    #feedback {
+      margin-top: 12px;
+      padding: 14px 16px;
+      border-radius: var(--radius-md);
+      font-weight: 900;
+      font-size: 0.95rem;
+      display: none;
+    }
+    .fb-success { background: #ecfdf5; color: var(--success); border-left: 4px solid var(--success); display: block !important; }
+    .fb-error { background: #fef2f2; color: var(--error); border-left: 4px solid var(--error); display: block !important; }
+
+    .divider{
+      height: 1px;
+      background: rgba(15,23,42,.08);
+      margin: 16px 0;
+      border-radius: 999px;
+    }
+    .sectionHint{
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      gap: 10px;
+      margin: 2px 0 12px;
+      color: var(--text-muted);
+      font-weight: 900;
+      font-size: .92rem;
+      flex-wrap: wrap;
+    }
+    .sectionHint .chip{
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: rgba(99,102,241,.06);
+      border: 1px solid rgba(99,102,241,.16);
+      color: var(--text-main);
+      font-weight: 1000;
+      font-size: .9rem;
+    }
+    .sectionHint i{ color: rgba(99,102,241,.95); }
+
+    /* ===== 互動區 ===== */
+    .arena { display: flex; flex-direction: column; gap: 16px; }
+
+    .drop-zones { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .zone {
+      background: rgba(255,255,255,0.4);
+      border: 2px dashed #e2e8f0;
+      border-radius: var(--radius-lg);
+      min-height: 260px;
+      padding: 18px;
+      position: relative;
+    }
+    .zone.hover { border-color: var(--accent); background: rgba(99,102,241,0.05); }
+    .zone-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .zone-title { font-weight: 1000; font-size: 0.95rem; display: flex; align-items: center; gap: 10px; }
+    .zone-count { font-size: 0.82rem; background: var(--accent); color: white; padding: 4px 10px; border-radius: 999px; font-weight: 1000; }
+
+    .items-container { display: flex; flex-wrap: wrap; gap: 8px; align-content: flex-start; }
+    .mini-item {
+      width: 38px; height: 38px;
+      background: white;
+      border-radius: 12px;
+      display: grid; place-items: center;
+      font-size: 1.15rem;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+      cursor: pointer;
+      animation: appear 0.25s ease-out;
+      border: 1px solid rgba(15,23,42,.05);
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    @keyframes appear { from { transform: scale(0.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+    .tray {
+      background: white;
+      border-radius: var(--radius-lg);
+      padding: 18px;
+      box-shadow: var(--shadow);
+    }
+    .tray-title {
+      font-size: 0.85rem; font-weight: 1000; color: var(--text-muted);
+      margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px;
+      display:flex; align-items:center; justify-content: space-between; gap: 10px;
+    }
+
+    .token-list { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .token {
+      background: #f1f5f9;
+      padding: 14px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      cursor: grab;
+      user-select: none;
+      touch-action: none;
+      border: 1px solid transparent;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .token:hover { background: #e2e8f0; border-color: var(--accent-light); }
+    .token:active { cursor: grabbing; transform: scale(0.99); }
+    .token-icon { font-size: 1.8rem; }
+    .token-info b { font-size: 0.95rem; display: block; font-weight: 1000; }
+    .token-info span { font-size: 0.75rem; color: var(--text-muted); font-weight: 800; }
+
+    #dragClone {
+      position: fixed;
+      pointer-events: none;
+      z-index: 1000;
+      background: white;
+      padding: 10px 16px;
+      border-radius: var(--radius-md);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      opacity: 0;
+      border: 1px solid var(--accent);
+      font-weight: 1000;
+      transform: translate3d(-9999px,-9999px,0);
+      will-change: transform, opacity;
+    }
+
+    /* ===== 新增：輸入模式（不破壞原風格） ===== */
+    .manualRow{
+      display:flex;
+      gap: 12px;
+      align-items:center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      margin: 10px 0 4px;
+    }
+    .manualChip{
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: rgba(99,102,241,.06);
+      border: 1px solid rgba(99,102,241,.16);
+      color: var(--text-main);
+      font-weight: 1000;
+      font-size: .9rem;
+      user-select:none;
+    }
+    .manualChip i{ color: rgba(99,102,241,.95); }
+    .manualInputs{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    .mField{
+      display:flex;
+      align-items:center;
+      gap: 8px;
+      background: white;
+      border: 1px solid rgba(15,23,42,.06);
+      border-radius: 999px;
+      padding: 8px 10px;
+      box-shadow: var(--shadow);
+    }
+    .mLabel{
+      font-weight: 1000;
+      color: var(--text-main);
+      font-size: .9rem;
+      display:flex;
+      align-items:center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+    .mInput{
+      width: 92px;
+      border: 0;
+      outline: none;
+      font-weight: 1000;
+      font-size: .95rem;
+      text-align: center;
+      background: transparent;
+      color: var(--text-main);
+    }
+    .mInput::-webkit-outer-spin-button,
+    .mInput::-webkit-inner-spin-button{ -webkit-appearance: none; margin: 0; }
+    .mInput[type=number]{ -moz-appearance: textfield; }
+    .btn-mini{
+      border: 0;
+      cursor: pointer;
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-weight: 1000;
+      font-size: .92rem;
+      display:inline-flex;
+      align-items:center;
+      gap: 10px;
+      box-shadow: var(--shadow);
+      background: #fff;
+      color: var(--text-main);
+      border: 1px solid rgba(15,23,42,.06);
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+    .btn-mini:hover{ transform: translateY(-2px); color: var(--accent); }
+    .btn-mini:active{ transform: translateY(-1px); }
+    .btn-mini.primary{
+      background: linear-gradient(180deg, rgba(99,102,241,.95), rgba(99,102,241,.80));
+      color:#fff;
+      border: 1px solid rgba(99,102,241,.35);
+    }
+    .btn-mini.primary i{ color:#fff; }
+
+    /* ===== 按鈕 ===== */
+    .actionRow{
+      display:flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+      padding-top: 2px;
+    }
+    .btn-action{
+      border: 0;
+      background: #fff;
+      color: var(--text-main);
+      box-shadow: var(--shadow);
+      cursor:pointer;
+      border-radius: 999px;
+      padding: 10px 16px;
+      font-weight: 1000;
+      font-size: .92rem;
+      display:inline-flex;
+      align-items:center;
+      gap: 10px;
+      border: 1px solid rgba(15,23,42,.06);
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+    .btn-action:hover{ transform: translateY(-2px); color: var(--accent); }
+    .btn-action:active{ transform: translateY(-1px); }
+    .btn-action.primary{
+      background: linear-gradient(180deg, rgba(99,102,241,.95), rgba(99,102,241,.80));
+      color: #fff;
+      border: 1px solid rgba(99,102,241,.35);
+    }
+    .btnIcon{
+      width: 34px; height: 34px;
+      border-radius: 999px;
+      display:grid; place-items:center;
+      background: rgba(99,102,241,.10);
+      border: 1px solid rgba(99,102,241,.18);
+      color: rgba(99,102,241,.95);
+      flex: 0 0 auto;
+    }
+    .btn-action.primary .btnIcon{
+      background: rgba(255,255,255,.18);
+      border: 1px solid rgba(255,255,255,.22);
+      color: #fff;
+    }
+
+    /* 排行榜樣式 */
+    .lbList { display: flex; flex-direction: column; gap: 8px; }
+    .lbRow {
+      display: flex; align-items: center; gap: 12px;
+      background: white; padding: 10px 14px; border-radius: 14px;
+      border: 1px solid rgba(0,0,0,0.03);
+    }
+    .lbRank { width: 28px; font-weight: 900; color: var(--accent); font-size: 1rem; }
+    .lbName { flex: 1; font-weight: 800; color: var(--text-main); }
+    .lbScore { font-weight: 1000; color: var(--text-main); display: flex; align-items: center; gap: 6px; }
+    .lbScore small { font-size: 0.7rem; color: var(--text-muted); font-weight: 700; }
+    .lbEmpty { text-align: center; padding: 20px; color: var(--text-muted); font-weight: 800; font-style: italic; }
+
+    /* ✅ Footer pill（新增，不動其他區塊） */
+    footer{
+      padding: 26px 20px;
+      display:flex;
+      justify-content:center;
+    }
+    .footer-pill{
+      width: min(1200px, 100%);
+      background: rgba(255,255,255,0.78);
+      border: 1px solid rgba(15,23,42,0.08);
+      border-radius: 999px;
+      padding: 12px 16px;
+      box-shadow: var(--shadow);
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .footer-left, .footer-right{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .footer-dot{
+      width: 10px; height: 10px;
+      border-radius: 999px;
+      background: var(--brand-yellow);
+      box-shadow: 0 6px 14px rgba(255,215,0,.25);
+      flex: 0 0 auto;
+    }
+    .footer-copy{
+      font-weight: 900;
+      color: var(--text-main);
+      font-size: 0.9rem;
+      letter-spacing: .1px;
+    }
+    .footer-icon{
+      width: 34px; height: 34px;
+      border-radius: 999px;
+      display:grid;
+      place-items:center;
+      background: rgba(99,102,241,.10);
+      border: 1px solid rgba(99,102,241,.18);
+      color: rgba(99,102,241,.95);
+      flex: 0 0 auto;
+    }
+    .footer-tagline{
+      font-weight: 900;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      letter-spacing: .1px;
+    }
+    @media (max-width: 520px){
+      .footer-pill{
+        border-radius: 22px;
+        justify-content:center;
+        text-align:center;
+        padding: 14px 14px;
+        gap: 10px;
+      }
+      .footer-left, .footer-right{ justify-content:center; width: 100%; }
+    }
+
+    /* ===== RWD 微調：手機按鈕滿版、輸入列更順 ===== */
+    @media (max-width: 520px){
+      main{ padding: 14px 12px 34px; }
+      .card{ padding: 16px; }
+      .questionPanel{ padding: 14px; }
+      .hudBar{ padding: 12px; border-radius: 16px; }
+      .hudVal{ font-size: 1rem; }
+      .actionRow{ gap: 10px; }
+      .btn-action{ width: 100%; justify-content: center; padding: 12px 14px; }
+      .btnIcon{ width: 32px; height: 32px; }
+      .drop-zones{ gap: 12px; }
+      .zone{ min-height: 230px; padding: 14px; }
+      .mini-item{ width: 40px; height: 40px; }
+
+      .manualRow{ gap: 10px; justify-content: center; }
+      .manualInputs{ width: 100%; justify-content: center; }
+      .mField{ width: 100%; justify-content: center; }
+      .mInput{ width: 110px; }
+      .btn-mini{ width: 100%; justify-content: center; }
+    }
+
+    @media (max-width: 950px) {
+      .hero{ padding: 12px 14px; }
+      .heroBrand .name{ font-size: 1.15rem; }
+      .pillLink{ padding: 9px 14px; font-size: 0.9rem; }
+      .drop-zones{ grid-template-columns: 1fr; }
+      .token-list{ grid-template-columns: 1fr; }
+    }
+
+    /* ===== Name Modal ===== */
+    .modalMask {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at center, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.9));
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      padding: 20px;
+    }
+    .modal {
+      width: min(480px, 100%);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.9));
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      border-radius: 32px;
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,0.4) inset,
+        0 25px 60px -15px rgba(0, 0, 0, 0.3);
+      padding: 32px;
+      position: relative;
+      overflow: hidden;
+      animation: modalPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes modalPop {
+      from { transform: scale(0.9) translateY(20px); opacity: 0; }
+      to { transform: scale(1) translateY(0); opacity: 1; }
+    }
+    .modal::before {
+      content: "";
+      position: absolute;
+      top: -50px; right: -50px;
+      width: 120px; height: 120px;
+      background: var(--accent);
+      filter: blur(60px);
+      opacity: 0.15;
+      z-index: 0;
+    }
+    .modalTop {
+      text-align: center;
+      margin-bottom: 24px;
+      position: relative;
+      z-index: 1;
+    }
+    .modalBadge {
+      width: 60px; height: 60px;
+      margin: 0 auto 16px;
+      background: white;
+      border-radius: 20px;
+      display: grid; place-items: center;
+      font-size: 1.8rem;
+      color: var(--accent);
+      box-shadow: 0 10px 20px rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.1);
+    }
+    .modalTitle span {
+      display: block;
+      font-size: 1.5rem;
+      font-weight: 1000;
+      color: var(--text-main);
+      letter-spacing: -0.5px;
+    }
+    .modalBody {
+      text-align: center;
+      color: var(--text-muted);
+      font-weight: 700;
+      line-height: 1.6;
+      font-size: 1rem;
+      margin-bottom: 24px;
+      position: relative;
+      z-index: 1;
+    }
+    .nameRow {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      position: relative;
+      z-index: 1;
+    }
+    .nameInput {
+      width: 100%;
+      border-radius: 20px;
+      border: 2px solid rgba(226, 232, 240, 0.8);
+      background: white;
+      padding: 16px 20px;
+      font-weight: 900;
+      font-size: 1.1rem;
+      text-align: center;
+      outline: none;
+      transition: all 0.3s;
+    }
+    .nameInput:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 6px rgba(99, 102, 241, 0.1);
+      transform: translateY(-2px);
+    }
+    .startBtn {
+      width: 100%;
+      border: 0;
+      border-radius: 20px;
+      padding: 16px;
+      font-weight: 1000;
+      font-size: 1.1rem;
+      cursor: pointer;
+      background: linear-gradient(135deg, var(--accent), var(--accent-light));
+      color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      gap: 12px;
+      box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
+      user-select: none;
+      touch-action: manipulation;
+    }
+    .startBtn:hover {
+      filter: brightness(1.1);
+      transform: translateY(-2px);
+      box-shadow: 0 15px 30px rgba(99, 102, 241, 0.4);
+    }
+    .startBtn:active { transform: translateY(0); }
+
+    .nameErr {
+      display: none;
+      text-align: center;
+      margin-bottom: 12px;
+      padding: 10px;
+      border-radius: 12px;
+      background: rgba(239, 68, 68, 0.08);
+      color: var(--error);
+      font-weight: 900;
+      font-size: 0.9rem;
+      border: 1px solid rgba(239, 68, 68, 0.15);
+    }
+
+    /* 確保拖拉時不會有過渡干擾 */
+    .token, .token * { transition: none !important; }
+    #dragClone, #dragClone * { transition: none !important; }
+    .zone, .mini-item { transition: none !important; }
+  </style>
+</head>
+
+<body>
+
+  <div class="hero-wrap">
+    <div class="hero">
+      <div class="hero-left">
+        <div class="avatarRing" aria-hidden="true">
+          <img src="JESSIEMATH-Q.png" alt="Jessie Math Avatar">
+        </div>
+        <div class="heroBrand">
+          <div class="name">Jessie Math</div>
+          <div class="sub">邏輯實驗室・雞兔篇</div>
+        </div>
+      </div>
+
+      <div class="hero-right">
+        <a class="pillLink" href="https://jessiemath0703-chu.github.io/website2/" target="_blank" rel="noopener">
+          <i class="fa-solid fa-house"></i><span>首頁</span>
+        </a>
+        <a class="pillLink" href="https://jessiemath0703-chu.github.io/Game-Lobby/" target="_blank" rel="noopener">
+          <i class="fa-solid fa-gamepad"></i><span>遊戲大廳</span>
+        </a>
+        <a class="pillLink" href="https://jessiemath0703-chu.github.io/Game-Lobby/#g6-u9" target="_blank" rel="noopener">
+          <i class="fa-solid fa-rotate-left"></i><span>六年級怎樣解題</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <section class="card">
+      <div class="hudBar">
+        <div class="hudItem">
+          <span class="hudIcon"><i class="fa-solid fa-user"></i></span>
+          <span class="hudSmall">玩家：</span>
+          <span class="hudVal" id="playerNameBar">—</span>
+        </div>
+
+        <div class="hudItem">
+          <span class="hudIcon"><i class="fa-solid fa-clock"></i></span>
+          <span class="hudSmall">剩餘時間：</span>
+          <span class="hudVal"><span id="timeLeft">90</span>s</span>
+        </div>
+
+        <div class="hudItem">
+          <span class="hudIcon"><i class="fa-solid fa-star"></i></span>
+          <span class="hudSmall">目前積分：</span>
+          <span class="hudVal" id="score">0</span>
+        </div>
+      </div>
+
+      <div class="questionPanel">
+        <div class="qTitle">🧩 題目</div>
+        <div class="story-text" id="story">正在初始化實驗數據...</div>
+        <div class="stats-row">
+          <div class="stat-box">
+            <label id="m1Lab">總數量</label>
+            <span id="m1Val">—</span>
+          </div>
+          <div class="stat-box">
+            <label id="m2Lab">總腿數</label>
+            <span id="m2Val">—</span>
+          </div>
+        </div>
+        <div id="feedback"></div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="sectionHint">
+        <div class="chip"><i class="fa-solid fa-hand-pointer"></i> 回答區（互動區）</div>
+        <div style="font-weight:900;">拖拉元素到框框，或用「輸入」一次放入指定數量</div>
+      </div>
+
+      <!-- ✅ 新增：手動輸入放入數量（不動原架構，只插入一條） -->
+      <div class="manualRow">
+        <div class="manualChip"><i class="fa-solid fa-keyboard"></i> 輸入模式（大量更快）</div>
+        <div class="manualInputs">
+          <div class="mField" title="輸入要放入左框的數量">
+            <div class="mLabel"><span id="mAEmoji">🐔</span><span id="mAName">雞</span></div>
+            <input class="mInput" id="inpA" type="number" min="0" step="1" inputmode="numeric" placeholder="數量">
+          </div>
+          <div class="mField" title="輸入要放入右框的數量">
+            <div class="mLabel"><span id="mBEmoji">🐰</span><span id="mBName">兔</span></div>
+            <input class="mInput" id="inpB" type="number" min="0" step="1" inputmode="numeric" placeholder="數量">
+          </div>
+          <button class="btn-mini primary" id="btnApply" title="依輸入放入數量">
+            <i class="fa-solid fa-wand-magic-sparkles"></i><span>套用數量</span>
+          </button>
+          <button class="btn-mini" id="btnSync" title="把目前框內數量帶回輸入欄">
+            <i class="fa-solid fa-arrows-rotate"></i><span>同步輸入</span>
+          </button>
+        </div>
+      </div>
+
+      <section class="arena">
+        <div class="drop-zones">
+          <div class="zone" id="penA" data-kind="A">
+            <div class="zone-header">
+              <div class="zone-title"><span id="penAEmoji">🐔</span> <span id="penAName">雞</span></div>
+              <div class="zone-count"><span id="countA">0</span></div>
+            </div>
+            <div class="items-container" id="insideA"></div>
+          </div>
+          <div class="zone" id="penB" data-kind="B">
+            <div class="zone-header">
+              <div class="zone-title"><span id="penBEmoji">🐰</span> <span id="penBName">兔</span></div>
+              <div class="zone-count"><span id="countB">0</span></div>
+            </div>
+            <div class="items-container" id="insideB"></div>
+          </div>
+        </div>
+
+        <div class="tray">
+          <div class="tray-title">
+            <span>元素托盤</span>
+            <span style="font-size:.78rem;color:var(--text-muted);font-weight:900;">拖拉到上方框框</span>
+          </div>
+          <div class="token-list" id="tokens"></div>
+        </div>
+
+        <div class="actionRow">
+          <button class="btn-action" id="btnPause" title="暫停/繼續">
+            <span class="btnIcon"><i class="fa-solid fa-pause"></i></span>
+            <span id="pauseText">暫停</span>
+          </button>
+          <button class="btn-action" id="btnRestart" title="重來">
+            <span class="btnIcon"><i class="fa-solid fa-rotate-right"></i></span>
+            <span>重來</span>
+          </button>
+
+          <button class="btn-action" id="btnNew" title="更換題目">
+            <span class="btnIcon"><i class="fa-solid fa-shuffle"></i></span>
+            <span>更換題目</span>
+          </button>
+          <button class="btn-action" id="btnClear" title="清空實驗區">
+            <span class="btnIcon"><i class="fa-solid fa-broom"></i></span>
+            <span>清空實驗區</span>
+          </button>
+          <button class="btn-action primary" id="btnCheck" title="驗證答案">
+            <span class="btnIcon"><i class="fa-solid fa-circle-check"></i></span>
+            <span>驗證答案</span>
+          </button>
+        </div>
+
+        <div class="questionPanel" style="margin-top:8px;">
+          <div class="qTitle" style="margin-bottom:6px;">🏆 排行榜</div>
+          <div id="lbBody"><div class="lbEmpty">尚無紀錄，來當第一名 ✨</div></div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <!-- ✅ 依你指定的 footer（取代原本純文字 footer） -->
+  <footer>
+    <div class="footer-pill">
+      <div class="footer-left">
+        <div class="footer-dot" aria-hidden="true"></div>
+        <div class="footer-copy">© 2025–2026 Jessie Math 捷析老師. All rights reserved.</div>
+      </div>
+      <div class="footer-right">
+        <div class="footer-icon" aria-hidden="true"><i class="fas fa-compass"></i></div>
+        <div class="footer-tagline">數學不迷路，Jessie 帶你走向理解。</div>
+      </div>
+    </div>
+  </footer>
+
+  <div id="dragClone">
+    <span id="cloneEmoji" style="font-size:1.5rem"></span>
+    <b id="cloneName"></b>
+  </div>
+
+  <div class="modalMask" id="nameMask" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true">
+      <div class="modalTop">
+        <div class="modalBadge"><i class="fa-solid fa-flask-vial"></i></div>
+        <div class="modalTitle">
+          <span>進入邏輯實驗室</span>
+        </div>
+      </div>
+      <div class="modalBody">
+        在開始挑戰之前，請告訴實驗室你的代號，<br>
+        系統將為你記錄本次的實驗積分。
+      </div>
+      <div class="nameErr" id="nameErr">⚠️ 請輸入有效的玩家名稱</div>
+      <div class="nameRow">
+        <input class="nameInput" id="nameInput" type="text" maxlength="16" placeholder="輸入你的名字..." autocomplete="off" />
+        <button class="startBtn" id="startBtn">
+          <span>開始實驗</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+<script>
+(() => {
+  const $ = s => document.querySelector(s);
+  const $$ = s => document.querySelectorAll(s);
+
+  const rInt = (a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+  const pick = arr => arr[Math.floor(Math.random()*arr.length)];
+
+  /* ===== 題庫 ===== */
+  const THEMES = [
+    {
+      id: "animals",
+      a: { key:"A", name:"雞", emoji:"🐔", unit:"隻", each: 2, label:"2 條腿" },
+      b: { key:"B", name:"兔", emoji:"🐰", unit:"隻", each: 4, label:"4 條腿" },
+      m1: "總頭數", m2: "總腿數",
+      story: (n, t2) => pick([
+        `小明把雞和兔關在同一個籠子裡，總共有 <span class="k">${n}</span> 隻。若牠們的腿總共有 <span class="k">${t2}</span> 條，雞與兔各幾隻？`,
+        `農場裡共有 <span class="k">${n}</span> 隻動物，只有雞與兔兩種。牠們的腿共有 <span class="k">${t2}</span> 條。請問雞、兔各幾隻？`,
+        `校園動物角今天點名：雞與兔一共 <span class="k">${n}</span> 隻。腿數合計 <span class="k">${t2}</span> 條。請還原兩者數量。`
+      ])
+    },
+    {
+      id: "stamps",
+      a: { key:"A", name:"8元郵票", emoji:"📮", unit:"張", each: 8, label:"每張 8 元" },
+      b: { key:"B", name:"28元郵票", emoji:"✉️", unit:"張", each: 28, label:"每張 28 元" },
+      m1: "總張數", m2: "總面額（元）",
+      story: (n, t2) => pick([
+        `信封上貼有兩種郵票共 <span class="k">${n}</span> 張：8元郵票與28元郵票。總面額為 <span class="k">${t2}</span> 元。請問各幾張？`,
+        `郵局任務：8元 與 28元 郵票共 <span class="k">${n}</span> 張，合計 <span class="k">${t2}</span> 元。求各自張數。`
+      ]),
+      gen: () => {
+        const n = rInt(10, 24);
+        const ansA = rInt(1, n-1);
+        const ansB = n - ansA;
+        const t2 = ansA*8 + ansB*28;
+        if (t2 < 120 || t2 > 820) return null;
+        return { n, t2, ansA, ansB };
+      }
+    },
+    {
+      id: "wheels",
+      a: { key:"A", name:"滑步車", emoji:"🛴", unit:"台", each: 2, label:"2 個輪子" },
+      b: { key:"B", name:"小貨車", emoji:"🚚", unit:"台", each: 4, label:"4 個輪子" },
+      m1: "車輛總台數", m2: "輪子總數",
+      story: (n, t2) => pick([
+        `工坊裡有滑步車與小貨車共 <span class="k">${n}</span> 台，輪子總共有 <span class="k">${t2}</span> 個。請問各幾台？`,
+        `停車區只有 2 輪與 4 輪兩種車，共 <span class="k">${n}</span> 台，輪子總數 <span class="k">${t2}</span> 個。`
+      ])
+    },
+    {
+      id: "seats",
+      a: { key:"A", name:"雙人桌", emoji:"🧑‍🤝‍🧑", unit:"張", each: 2, label:"2 個座位" },
+      b: { key:"B", name:"四人桌", emoji:"👨‍👩‍👧‍👦", unit:"張", each: 4, label:"4 個座位" },
+      m1: "桌子總張數", m2: "座位總數",
+      story: (n, t2) => pick([
+        `餐廳只有雙人桌與四人桌，共 <span class="k">${n}</span> 張。總座位數是 <span class="k">${t2}</span> 個。請問各幾張？`,
+        `教室排桌：2座與4座桌共 <span class="k">${n}</span> 張，座位總數 <span class="k">${t2}</span> 個。`
+      ])
+    },
+    {
+      id: "caps",
+      a: { key:"A", name:"小杯", emoji:"🥤", unit:"杯", each: 1, label:"1 根吸管" },
+      b: { key:"B", name:"大杯", emoji:"🧋", unit:"杯", each: 2, label:"2 根吸管" },
+      m1: "飲料總杯數", m2: "吸管總根數",
+      story: (n, t2) => pick([
+        `飲料店準備了小杯與大杯共 <span class="k">${n}</span> 杯。小杯用 1 根吸管、大杯用 2 根吸管，總吸管數為 <span class="k">${t2}</span> 根。`
+      ])
+    }
+  ];
+
+  /* ===== 邏輯變數 ===== */
+  const GAME_SECONDS = 90;
+  const SCORE_CORRECT = 10;
+  const SCORE_WRONG = -3;
+  const LB_KEY = "JM_G6_U9_LB_CHICKRABBIT";
+
+  // ✅ 輸入模式：為了不卡住畫面，顯示的 emoji 上限
+  const MAX_RENDER_ITEMS = 120;
+
+  let playerName = "";
+  let score = 0;
+  let timeLeft = GAME_SECONDS;
+  let timerId = null;
+  let started = false;
+  let ended = false;
+  let paused = false;
+
+  let currentTheme = THEMES[0];
+  let puzzle = { n: 0, t2: 0, ansA: 0, ansB: 0 };
+  let placed = { A: 0, B: 0 };
+
+  function setScore(v){ score = v; $("#score").textContent = score; }
+  function setTime(v){ timeLeft = Math.max(0, v); $("#timeLeft").textContent = timeLeft; }
+  function stopTimer(){ if(timerId){ clearInterval(timerId); timerId = null; } }
+
+  function loadLeaderboard(){
+    try{ const raw = localStorage.getItem(LB_KEY); return raw ? JSON.parse(raw) : []; }catch(e){ return []; }
+  }
+
+  function saveToLeaderboard(name, sc, usedSeconds){
+    const list = loadLeaderboard();
+    list.push({ name, score: sc, usedSeconds, ts: Date.now() });
+    list.sort((a,b) => (b.score !== a.score) ? b.score - a.score : a.usedSeconds - b.usedSeconds);
+    localStorage.setItem(LB_KEY, JSON.stringify(list.slice(0, 50)));
+  }
+
+  function renderLeaderboard(){
+    const list = loadLeaderboard().slice(0, 10);
+    const body = $("#lbBody");
+    if(!list.length){ body.innerHTML = `<div class="lbEmpty">尚無紀錄 ✨</div>`; return; }
+    body.innerHTML = `<div class="lbList">` + list.map((r, i) => `
+      <div class="lbRow">
+        <div class="lbRank">${i+1}</div>
+        <div class="lbName">${r.name}</div>
+        <div class="lbScore">${r.score}<small>${r.usedSeconds}s</small></div>
+      </div>`).join("") + `</div>`;
+  }
+
+  function endGame(){
+    ended = true; started = false; paused = false; stopTimer();
+    const bonus = Math.floor(timeLeft / 3);
+    setScore(score + bonus);
+    saveToLeaderboard(playerName, score, GAME_SECONDS - timeLeft);
+    const fb = $("#feedback");
+    fb.className = "fb-success";
+    fb.textContent = `⏳ 時間到！最終得分：${score}`;
+    renderLeaderboard();
+    $("#btnCheck").disabled = true;
+    $("#btnNew").disabled = true;
+    $("#btnClear").disabled = true;
+    $("#btnPause").disabled = true;
+    $("#btnApply").disabled = true;
+    $("#btnSync").disabled = true;
+    $("#inpA").disabled = true;
+    $("#inpB").disabled = true;
+  }
+
+  function tick(){
+    if(paused || ended || !started) return;
+    setTime(timeLeft - 1);
+    if(timeLeft <= 0) endGame();
+  }
+
+  function startGame(){
+    started = true; ended = false; paused = false;
+    setScore(0); setTime(GAME_SECONDS);
+    $("#pauseText").textContent = "暫停";
+    $("#btnPause i").className = "fa-solid fa-pause";
+
+    $("#btnCheck").disabled = false;
+    $("#btnNew").disabled = false;
+    $("#btnClear").disabled = false;
+    $("#btnPause").disabled = false;
+
+    $("#btnApply").disabled = false;
+    $("#btnSync").disabled = false;
+    $("#inpA").disabled = false;
+    $("#inpB").disabled = false;
+
+    stopTimer();
+    timerId = setInterval(tick, 1000);
+  }
+
+  function makePuzzle(t){
+    if (typeof t.gen === "function"){ const p = t.gen(); if(p) return p; }
+    const n = rInt(10, 26);
+    const ansA = rInt(1, n-1);
+    const ansB = n - ansA;
+    const t2 = ansA * t.a.each + ansB * t.b.each;
+    return { n, t2, ansA, ansB };
+  }
+
+  function renderInside(kind){
+    const container = kind === "A" ? $("#insideA") : $("#insideB");
+    const emoji = kind === "A" ? currentTheme.a.emoji : currentTheme.b.emoji;
+    container.innerHTML = "";
+
+    const count = placed[kind];
+    const show = Math.min(count, MAX_RENDER_ITEMS);
+
+    for(let i=0;i<show;i++){
+      const item = document.createElement("div");
+      item.className = "mini-item";
+      item.textContent = emoji;
+      item.onclick = () => { if(!started || ended || paused) return; item.remove(); placed[kind]--; updateCounts(); syncInputsFromPlaced(); };
+      container.appendChild(item);
+    }
+
+    // 超過上限時，最後用一個「+N」提示，避免塞爆
+    if(count > MAX_RENDER_ITEMS){
+      const hint = document.createElement("div");
+      hint.className = "mini-item";
+      hint.style.width = "auto";
+      hint.style.padding = "0 10px";
+      hint.style.fontSize = ".95rem";
+      hint.textContent = `+${count - MAX_RENDER_ITEMS}`;
+      hint.title = "已用輸入快速放入大量數量（為了效能，這裡不全部渲染）";
+      container.appendChild(hint);
+    }
+  }
+
+  function initPuzzle() {
+    const t = currentTheme;
+    puzzle = makePuzzle(t);
+    placed = { A: 0, B: 0 };
+
+    $("#story").innerHTML = t.story(puzzle.n, puzzle.t2);
+    $("#m1Lab").textContent = t.m1; $("#m2Lab").textContent = t.m2;
+    $("#m1Val").textContent = puzzle.n; $("#m2Val").textContent = puzzle.t2;
+
+    $("#penAName").textContent = t.a.name; $("#penBName").textContent = t.b.name;
+    $("#penAEmoji").textContent = t.a.emoji; $("#penBEmoji").textContent = t.b.emoji;
+
+    // ✅ 同步輸入列的名稱與 emoji
+    $("#mAName").textContent = t.a.name; $("#mBName").textContent = t.b.name;
+    $("#mAEmoji").textContent = t.a.emoji; $("#mBEmoji").textContent = t.b.emoji;
+
+    $("#feedback").style.display = "none";
+
+    updateCounts();
+    renderInside("A");
+    renderInside("B");
+    syncInputsFromPlaced();
+    renderTokens();
+  }
+
+  function renderTokens() {
+    const container = $("#tokens");
+    container.innerHTML = "";
+    [currentTheme.a, currentTheme.b].forEach(item => {
+      const div = document.createElement("div");
+      div.className = "token";
+      div.innerHTML = `<div class="token-icon">${item.emoji}</div><div class="token-info"><b>${item.name}</b><span>${item.label}</span></div>`;
+      setupDrag(div, item);
+      container.appendChild(div);
+    });
+    if(!started || paused) $$(".token").forEach(t => t.style.pointerEvents = "none");
+  }
+
+  /* ===== 拖拉核心 ===== */
+  let rafId = null;
+  const moveState = { x: -9999, y: -9999, zone: null };
+  const getZoneUnderPoint = (x, y) => document.elementFromPoint(x, y)?.closest(".zone");
+
+  function rafTick(){
+    rafId = null;
+    $("#dragClone").style.transform = `translate3d(${moveState.x + 15}px, ${moveState.y + 15}px, 0)`;
+    $$(".zone").forEach(z => z.classList.remove("hover"));
+    if(moveState.zone) moveState.zone.classList.add("hover");
+  }
+
+  function setupDrag(el, item) {
+    let isDragging = false;
+
+    el.addEventListener("touchstart", (e)=>{ if(started && !ended) e.preventDefault(); }, { passive:false });
+
+    el.addEventListener("pointerdown", (e) => {
+      if(!started || ended || paused) return;
+      e.preventDefault();
+      isDragging = true;
+      el.setPointerCapture(e.pointerId);
+
+      $("#cloneEmoji").textContent = item.emoji;
+      $("#cloneName").textContent = item.name;
+      $("#dragClone").style.opacity = "1";
+
+      moveState.x = e.clientX; moveState.y = e.clientY;
+      moveState.zone = getZoneUnderPoint(e.clientX, e.clientY);
+
+      if(!rafId) rafId = requestAnimationFrame(rafTick);
+    });
+
+    el.addEventListener("pointermove", (e) => {
+      if(!isDragging) return;
+      moveState.x = e.clientX; moveState.y = e.clientY;
+      moveState.zone = getZoneUnderPoint(e.clientX, e.clientY);
+      if(!rafId) rafId = requestAnimationFrame(rafTick);
+    });
+
+    el.addEventListener("pointerup", (e) => {
+      if(!isDragging) return;
+      isDragging = false;
+      $("#dragClone").style.opacity = "0";
+
+      const zone = getZoneUnderPoint(e.clientX, e.clientY);
+      if(zone) addItem(zone.dataset.kind);
+
+      $$(".zone").forEach(z => z.classList.remove("hover"));
+    });
+  }
+
+  function addItem(kind) {
+    if(!started || ended || paused) return;
+    placed[kind]++;
+
+    updateCounts();
+    renderInside(kind);
+    syncInputsFromPlaced();
+  }
+
+  function updateCounts() { $("#countA").textContent = placed.A; $("#countB").textContent = placed.B; }
+
+  /* ===== ✅ 輸入模式 ===== */
+  function clampInt(v){
+    const n = Number(v);
+    if(!Number.isFinite(n)) return 0;
+    return Math.max(0, Math.floor(n));
+  }
+
+  function syncInputsFromPlaced(){
+    $("#inpA").value = placed.A;
+    $("#inpB").value = placed.B;
+  }
+
+  function applyInputsToPlaced(){
+    if(!started || ended || paused) return;
+    const a = clampInt($("#inpA").value);
+    const b = clampInt($("#inpB").value);
+
+    placed.A = a;
+    placed.B = b;
+
+    updateCounts();
+    renderInside("A");
+    renderInside("B");
+  }
+
+  $("#btnApply").onclick = applyInputsToPlaced;
+  $("#btnSync").onclick = syncInputsFromPlaced;
+
+  // 讓按 Enter 也能套用（更像在「輸入答案」）
+  $("#inpA").addEventListener("keydown", (e)=>{ if(e.key==="Enter") applyInputsToPlaced(); });
+  $("#inpB").addEventListener("keydown", (e)=>{ if(e.key==="Enter") applyInputsToPlaced(); });
+
+  /* ===== 按鈕功能 ===== */
+  $("#btnCheck").onclick = () => {
+    if(!started || ended || paused) return;
+    const isCorrect = placed.A === puzzle.ansA && placed.B === puzzle.ansB;
+    const fb = $("#feedback"); fb.style.display = "block";
+    if (isCorrect) {
+      fb.className = "fb-success"; fb.textContent = "✅ 正確！";
+      setScore(score + SCORE_CORRECT);
+      currentTheme = pick(THEMES);
+      initPuzzle();
+    } else {
+      fb.className = "fb-error";
+      fb.innerHTML = `❌ 答案不對喔！正確是：${currentTheme.a.name} ${puzzle.ansA}、${currentTheme.b.name} ${puzzle.ansB}`;
+      setScore(Math.max(0, score + SCORE_WRONG));
+    }
+  };
+
+  $("#btnNew").onclick = () => { if(!started || ended || paused) { currentTheme = pick(THEMES); initPuzzle(); } };
+
+  $("#btnClear").onclick = () => {
+    if(paused) return;
+    placed = { A: 0, B: 0 };
+    updateCounts();
+    renderInside("A");
+    renderInside("B");
+    syncInputsFromPlaced();
+  };
+
+  // 暫停 / 繼續
+  $("#btnPause").onclick = () => {
+    if(!started || ended) return;
+    paused = !paused;
+
+    $("#pauseText").textContent = paused ? "繼續" : "暫停";
+    $("#btnPause i").className = paused ? "fa-solid fa-play" : "fa-solid fa-pause";
+
+    $$(".token").forEach(t => t.style.pointerEvents = paused ? "none" : "auto");
+    $("#btnCheck").disabled = paused;
+    $("#btnClear").disabled = paused;
+    $("#btnNew").disabled = paused;
+
+    $("#btnApply").disabled = paused;
+    $("#btnSync").disabled = paused;
+    $("#inpA").disabled = paused;
+    $("#inpB").disabled = paused;
+  };
+
+  // 重來（保留名字與排行榜）
+  $("#btnRestart").onclick = () => {
+    if(!playerName) return;
+    ended = false;
+    paused = false;
+    $("#feedback").style.display = "none";
+    currentTheme = pick(THEMES);
+    startGame();
+    initPuzzle();
+    $$(".token").forEach(t => t.style.pointerEvents = "auto");
+  };
+
+  /* ===== 名字處理 ===== */
+  function commitName(){
+    const v = ($("#nameInput").value || "").trim();
+    if(!v){ $("#nameErr").style.display = "block"; return; }
+
+    playerName = v;
+    $("#playerNameBar").textContent = playerName;
+    $("#nameMask").style.display = "none";
+
+    startGame();
+    initPuzzle();
+    $$(".token").forEach(t => t.style.pointerEvents = "auto");
+  }
+
+  $("#startBtn").onclick = commitName;
+  $("#nameInput").onkeydown = (e) => { if(e.key === "Enter") commitName(); };
+
+  // 初始化
+  renderLeaderboard();
+  $("#nameMask").style.display = "flex";
+  setTime(GAME_SECONDS);
+  setTimeout(() => $("#nameInput").focus(), 300);
+})();
+</script>
+</body>
+</html>
+
+
