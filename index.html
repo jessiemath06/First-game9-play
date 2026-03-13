@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>Jessie Math 捷析 - 倖存者分配 </title>
+
+  <meta name="description" content="© 2025–2026 Jessie Math 捷析老師. All rights reserved.">
+  <meta property="og:title" content="Jessie Math 捷析 - 倖存者分配">
+  <meta property="og:description" content="© 2025–2026 Jessie Math 捷析老師. All rights reserved.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="g6-u9-2.png">
+  <meta property="og:image:width" content="1024">
+  <meta property="og:image:height" content="1536">
+  <meta property="og:image:alt" content="遊戲封面">
+  <link rel="image_src" href="g6-u9-2.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Jessie Math 捷析 - 倖存者分配">
+  <meta name="twitter:description" content="© 2025–2026 Jessie Math 捷析老師. All rights reserved.">
+  <meta name="twitter:image" content="g6-u9-2.png">
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+
+  <style>
+    :root {
+      /* 迷宮明亮沙土風格 */
+      --bg: #e6daca; 
+      --surface: rgba(253, 250, 246, 0.88);
+      --surface-border: rgba(189, 163, 133, 0.5);
+      --accent: #d97706; 
+      --accent-light: #f59e0b;
+      --text-main: #3e2723; 
+      --text-muted: #79553a; 
+      --success: #10b981;
+      --error: #ef4444;
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+
+      /* HUD */
+      --hudbar: rgba(235, 222, 206, 0.9);
+      --hudbar-text: #3e2723;
+      --hudbar-chip: rgba(255,255,255,0.6);
+      --hudbar-chip-bd: rgba(217, 119, 6, 0.2);
+    }
+
+    * { box-sizing: border-box; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
+
+    body {
+      margin: 0;
+      font-family: "Inter", "Noto Sans TC", sans-serif;
+      background-color: var(--bg);
+      background-image: 
+        radial-gradient(circle at 20% 30%, rgba(217, 119, 6, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(139, 115, 85, 0.12) 0%, transparent 50%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 手機直向強制橫向提示 */
+    #landscape-warning {
+      display: none;
+      position: fixed; inset: 0; z-index: 9999;
+      background: #fdf8f2; color: var(--accent);
+      flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; padding: 20px;
+    }
+    #landscape-warning i { font-size: 4rem; margin-bottom: 20px; animation: tilt 2s infinite ease-in-out; }
+    @keyframes tilt { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(-90deg); } }
+    
+    @media screen and (max-width: 767px) and (orientation: portrait) {
+      #landscape-warning { display: flex; }
+      #app-content { display: none; }
+    }
+
+    /* ===== HERO ===== */
+    .hero-wrap{
+      width:100%; position: sticky; top: 0; z-index: 50;
+      background-image: url('jessie logo.jpg');
+      background-size: cover;
+      background-position: center;
+      background-color: rgba(255, 255, 255, 0.95);
+      border-bottom: 1px solid rgba(0,0,0,0.08);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+    .hero-wrap::before {
+      content: ""; position: absolute; inset: 0;
+      background: rgba(255, 255, 255, 0.85); z-index: -1;
+    }
+    
+    .hero{
+      max-width: 1200px; margin: 0 auto; padding: 12px 20px;
+      display:flex; align-items:center; justify-content: space-between; gap: 14px;
+    }
+    .hero-left{ display:flex; align-items:center; gap: 12px; }
+    
+    /* 頭像圈圈 */
+    .avatarRing{
+      width: 48px; height: 48px;
+      border-radius: 999px;
+      background: transparent;
+      border: 3px solid #e07a2e; /* 黃橘色框 */
+      display: grid; place-items: center; flex: 0 0 auto;
+    }
+    .avatarRing img{ width: 42px; height: 42px; border-radius: 999px; object-fit: contain; }
+    
+    .heroBrand { display:flex; flex-direction: column; gap: 2px; line-height: 1.05; }
+    .heroBrand .name{ font-weight: 900; font-size: 1.4rem; color: #2c3e50; letter-spacing: 0.5px; }
+    
+    .hero-right{ display:flex; align-items:center; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+    .pillLink{
+      text-decoration:none; display:inline-flex; align-items:center; gap: 8px;
+      padding: 8px 16px; border-radius: 999px;
+      border: 1px solid rgba(15,23,42,0.1); background: #ffffff;
+      color: #2c3e50; font-weight: 800; font-size: 0.85rem;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    .pillLink i{ color: #4F46E5; }
+    .pillLink:hover{ background: #f8fafc; border-color: rgba(15,23,42,0.2); transform: translateY(-1px); }
+
+    /* ===== Main ===== */
+    main {
+      max-width: 1200px; margin: 0 auto; padding: 18px 20px 40px;
+      width: 100%; display: grid; grid-template-columns: 1fr; gap: 18px;
+    }
+
+    .card {
+      background: var(--surface); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--surface-border); border-radius: var(--radius-lg);
+      padding: 22px; box-shadow: var(--shadow);
+    }
+
+    /* ===== 題目長條 ===== */
+    .hudBar{
+      background: var(--hudbar); color: var(--hudbar-text); border-radius: 12px;
+      padding: 14px 16px; display:grid; grid-template-columns: repeat(4, auto);
+      align-items:center; justify-content: space-between; gap: 12px;
+      border: 1px solid rgba(189, 163, 133, 0.4); margin-bottom: 14px;
+    }
+    .hudItem{ display:flex; align-items:center; gap: 8px; font-weight: 900; white-space: nowrap; }
+    .hudIcon{ width: 30px; height: 30px; border-radius: 8px; display:grid; place-items:center; background: var(--hudbar-chip); color: var(--accent); border: 1px solid var(--hudbar-chip-bd); }
+    .hudVal{ font-size: 1.1rem; color: #a05a00; font-weight: 1000; }
+    .hudSmall{ opacity: .8; font-size: 0.85rem; }
+    
+    @media (max-width: 760px){ .hudBar{ grid-template-columns: 1fr 1fr; } }
+
+    .questionPanel{
+      background: rgba(255,255,255,0.6); border: 1px solid rgba(189, 163, 133, 0.5);
+      border-radius: 12px; padding: 18px;
+    }
+    
+    .qTopRow { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px; }
+    .qTitle { display:flex; align-items:center; gap: 10px; font-size: 1.15rem; font-weight: 1000; color: #8b5a2b; margin: 0; }
+    
+    .stats-row { display: flex; gap: 12px; }
+    .stat-box {
+      background: rgba(255,255,255,0.7); padding: 8px 24px; border-radius: 8px;
+      text-align: center; border: 1px solid rgba(0,0,0,0.05); min-width: 100px;
+    }
+    .stat-box label { font-size: 0.8rem; color: var(--text-muted); font-weight: 900; display: block; margin-bottom: 4px; }
+    .stat-box span { font-size: 1.35rem; font-weight: 1000; color: #a05a00; }
+
+    .story-text {
+      background: rgba(255,255,255,0.8); padding: 16px; border-radius: 8px;
+      line-height: 1.8; border: 1px solid rgba(0,0,0,0.05); margin: 0; font-size: 1.05rem;
+    }
+    .k { color: #a05a00; font-weight: 900; border-bottom: 2px solid rgba(217,119,6,0.3); padding: 0 2px; }
+
+    #feedback { margin-top: 12px; padding: 14px 16px; border-radius: 8px; font-weight: 900; text-align: center; display: none; }
+    .fb-success { background: #ecfdf5; color: var(--success); border: 1px solid #a7f3d0; display: block !important; }
+    .fb-error { background: #fef2f2; color: var(--error); border: 1px solid #fecaca; display: block !important; }
+
+    /* ===== 輸入區與 Token 拖曳整合 ===== */
+    .manualRow{ display:flex; gap: 12px; align-items:center; justify-content: space-between; flex-wrap: wrap; margin: 10px 0 16px; background: rgba(255,255,255,0.5); padding: 12px; border-radius: 8px; border: 1px solid rgba(189, 163, 133, 0.4); }
+    .manualChip{ color: #6d4c41; font-weight: 900; font-size: 0.9rem; }
+    .manualInputs{ display:flex; align-items:center; gap: 10px; flex-wrap: wrap; }
+    .mField{ display:flex; align-items:center; gap: 8px; background: #fff; border: 1px solid #d4bda5; border-radius: 6px; padding: 6px 10px; }
+    .mLabel{ font-weight: 900; color: #555; font-size: .9rem; }
+    .mInput{ width: 60px; border: 0; outline: none; font-weight: 1000; font-size: 1rem; text-align: center; background: transparent; color: #000; }
+    .mInput::-webkit-outer-spin-button, .mInput::-webkit-inner-spin-button{ -webkit-appearance: none; margin: 0; }
+    
+    .btn-mini{ border: 0; cursor: pointer; border-radius: 6px; padding: 8px 12px; font-weight: 800; font-size: .85rem; display:inline-flex; align-items:center; gap: 6px; background: #fff; color: #333; border: 1px solid #ccc; }
+    .btn-mini:hover{ background: #f1f5f9; }
+    .btn-mini.primary{ background: var(--accent); color:#fff; border: 1px solid var(--accent-light); }
+    .btn-mini.primary:hover{ background: var(--accent-light); }
+
+    /* Token 樣式 */
+    .token-list { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .token { background: #fff; padding: 6px 12px; border-radius: 8px; display: flex; align-items: center; gap: 8px; cursor: grab; border: 1px solid #d4bda5; user-select: none; touch-action: none; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+    .token:active { cursor: grabbing; transform: scale(0.98); border-color: var(--accent); }
+    .token-icon { font-size: 1.2rem; background: #fdf8f2; padding: 4px 6px; border-radius: 6px; border: 1px solid #eee; }
+    .token-info b { font-size: 0.9rem; display: block; font-weight: 900; color: #333; }
+
+    /* ===== 互動區 ===== */
+    .drop-zones { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 16px; }
+    .zone { background: rgba(255,255,255,0.4); border: 2px dashed #b89d82; border-radius: 12px; min-height: 220px; padding: 16px; position: relative; }
+    .zone.hover { border-color: var(--accent); background: rgba(217,119,6,0.1); }
+    .zone-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #d4bda5; padding-bottom: 8px; }
+    .zone-title { font-weight: 1000; color: var(--text-main); font-size: 1rem; }
+    .zone-count { font-size: 0.85rem; background: #fff; color: var(--accent); border: 1px solid #d4bda5; padding: 4px 10px; border-radius: 6px; font-weight: 1000; }
+
+    .items-container { display: flex; flex-wrap: wrap; gap: 6px; align-content: flex-start; }
+    .mini-item { width: 36px; height: 36px; background: #fff; border-radius: 6px; display: grid; place-items: center; font-size: 1.2rem; cursor: pointer; border: 1px solid #d4bda5; user-select: none; color: #000; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    .mini-item:hover { background: #fdf8f2; border-color: var(--accent); }
+
+    #dragClone { position: fixed; pointer-events: none; z-index: 1000; background: #fff; padding: 8px 14px; border-radius: 8px; border: 2px solid var(--accent); color: var(--text-main); display: flex; align-items: center; gap: 8px; opacity: 0; font-weight: 900; box-shadow: 0 10px 20px rgba(0,0,0,0.15); }
+
+    /* ===== 操作按鈕 ===== */
+    .actionRow{ display:flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 10px; }
+    .btn-action{ border: 1px solid #ccc; background: #fff; color: #333; cursor:pointer; border-radius: 8px; padding: 10px 18px; font-weight: 900; font-size: .95rem; display:inline-flex; align-items:center; gap: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); text-decoration: none; }
+    .btn-action:hover{ background: #f8fafc; border-color: #aaa; transform: translateY(-1px); }
+    .btn-action.primary{ background: var(--accent); color: #fff; border-color: var(--accent-light); }
+    .btn-action.primary:hover{ background: var(--accent-light); }
+
+    /* 左下角音效控制按鈕 */
+    .audio-btn {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      background: rgba(253, 250, 246, 0.9);
+      border: 2px solid var(--accent);
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      cursor: pointer;
+      z-index: 2000;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+    .audio-btn:hover { background: var(--accent); color: #fff; }
+    @media (max-width: 600px){
+      .audio-btn { bottom: 10px; left: 10px; width: 40px; height: 40px; font-size: 1rem; }
+    }
+
+    /* ===== 第一頁 / 排行榜 Modal ===== */
+    .modalMask { position: fixed; inset: 0; background: rgba(62, 39, 35, 0.6); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; z-index: 2000; padding: 20px; overflow-y: auto; }
+    .modal { width: min(600px, 100%); background: #fdf8f2; border: 1px solid #d4bda5; border-radius: 16px; padding: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
+    
+    .modalTop { text-align: center; margin-bottom: 20px; }
+    .modalBadge { width: 64px; height: 64px; margin: 0 auto 12px; background: #fff; border: 2px solid var(--accent); border-radius: 12px; display: grid; place-items: center; font-size: 2rem; color: var(--accent); box-shadow: 0 5px 15px rgba(217,119,6,0.15); }
+    .modalTitle { font-size: 1.8rem; font-weight: 1000; color: #8b5a2b; margin-bottom: 10px; letter-spacing: 2px;}
+    .modalRules { background: rgba(217,119,6,0.1); padding: 16px; border-radius: 8px; border-left: 4px solid var(--accent); text-align: left; margin-bottom: 20px; font-size: 0.95rem; line-height: 1.6; color: #555; }
+    .modalRules strong { color: #a05a00; }
+    
+    .nameInput { width: 100%; border-radius: 8px; border: 2px solid #ccc; background: #fff; padding: 14px; color: #333; font-weight: 900; font-size: 1.1rem; text-align: center; margin-bottom: 16px; outline: none; }
+    .nameInput:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(217,119,6,0.2); }
+    .startBtn { width: 100%; border: 0; border-radius: 8px; padding: 16px; font-weight: 1000; font-size: 1.1rem; cursor: pointer; background: var(--accent); color: #fff; box-shadow: 0 4px 15px rgba(217,119,6,0.3); text-transform: uppercase; letter-spacing: 1px;}
+    .startBtn:hover { background: var(--accent-light); transform: translateY(-2px); }
+
+    .lbContainer { margin-top: 24px; border-top: 1px solid #d4bda5; padding-top: 20px; }
+    .lbTitle { font-size: 1.2rem; font-weight: 900; color: #8b5a2b; margin-bottom: 12px; text-align: center; }
+    .lbList { display: flex; flex-direction: column; gap: 6px; }
+    .lbRow { display: flex; align-items: center; justify-content: space-between; background: #fff; padding: 10px 14px; border-radius: 6px; border: 1px solid #eee; font-size: 0.9rem; }
+    .lbRank { width: 30px; font-weight: 900; color: var(--accent); font-size: 1.1rem; text-align: center;}
+    .lbName { flex: 1; font-weight: 900; color: #333; margin-left: 10px; }
+    .lbData { text-align: right; color: #666; font-weight: 700; display:flex; gap: 10px; align-items:center;}
+    .lbPass { padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 900; }
+    .lbPass.success { background: #ecfdf5; color: #10b981; }
+    .lbPass.fail { background: #fef2f2; color: #ef4444; }
+    .lbEmpty { text-align: center; padding: 20px; color: #888; font-weight: 800; font-style: italic; }
+
+    /* ===== 透明計算白板系統 ===== */
+    #wbOverlay { position: fixed; inset: 0; z-index: 3000; background: rgba(255,255,255,0.01); display: none; }
+    #wbCanvas { width: 100%; height: 100%; touch-action: none; cursor: crosshair; }
+    .wb-toolbar { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); display: flex; gap: 14px; background: rgba(0,0,0,0.7); padding: 14px 20px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 1px solid #555; }
+
+    /* Footer */
+    footer{ padding: 26px 20px; display:flex; justify-content:center; }
+    .footer-pill{ width: min(1200px, 100%); background: rgba(255,255,255,0.78); border: 1px solid rgba(15,23,42,0.08); border-radius: 999px; padding: 12px 16px; box-shadow: var(--shadow); display:flex; align-items:center; justify-content: space-between; flex-wrap: wrap; gap: 14px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+    .footer-copy{ font-weight: 900; color: var(--text-main); font-size: 0.9rem; margin-left:10px; }
+    .footer-tagline{ font-weight: 900; color: var(--text-muted); font-size: 0.9rem; margin-right:10px;}
+    
+    @media (max-width: 600px){
+      .footer-pill{ border-radius: 22px; justify-content:center; text-align:center; padding: 14px; }
+      .footer-copy, .footer-tagline { margin: 0; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="landscape-warning">
+    <i class="fa-solid fa-mobile-screen-button"></i>
+    <h2>請旋轉您的設備</h2>
+    <p>為了獲得最佳的迷宮操作體驗，請將螢幕橫向放置。</p>
+  </div>
+
+  <div id="app-content">
+    <div class="hero-wrap">
+      <div class="hero">
+        <div class="hero-left">
+          <div class="avatarRing" aria-hidden="true">
+            <img src="JESSIEMATH-Q.png" alt="Jessie Math Avatar">
+          </div>
+          <div class="heroBrand">
+            <div class="name">Jessie Math捷析</div>
+          </div>
+        </div>
+        <div class="hero-right">
+          <a class="pillLink" href="https://jessiemath0703-chu.github.io/website2/" target="_blank">
+            <i class="fa-solid fa-house"></i> 首頁
+          </a>
+          <a class="pillLink" href="https://jessiemath0703-chu.github.io/Game-Lobby/" target="_blank">
+            <i class="fa-solid fa-gamepad"></i> 遊戲大廳
+          </a>
+          <a class="pillLink" href="https://jessiemath0703-chu.github.io/Game-Lobby/#g6-u9" target="_blank">
+            <i class="fa-solid fa-arrow-rotate-left"></i> 怎樣解題(一)
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <main>
+      <section class="card">
+        <div class="hudBar">
+          <div class="hudItem" title="玩家代號"><span class="hudIcon"><i class="fa-solid fa-user-astronaut"></i></span> <span class="hudVal" id="playerNameBar">—</span></div>
+          <div class="hudItem" title="剩餘時間"><span class="hudIcon"><i class="fa-solid fa-stopwatch"></i></span> <span class="hudVal"><span id="timeLeft">120</span>s</span></div>
+          <div class="hudItem" title="已答對題數"><span class="hudIcon"><i class="fa-solid fa-check-double"></i></span> <span class="hudVal" id="correctCountDisplay">0 / 7</span></div>
+          <div class="hudItem" title="目前積分"><span class="hudIcon"><i class="fa-solid fa-star"></i></span> <span class="hudVal" id="score">0</span></div>
+        </div>
+
+        <div class="questionPanel">
+          <div class="qTopRow">
+            <div class="qTitle"><i class="fa-solid fa-satellite-dish"></i> 基地傳來指令</div>
+            <div class="stats-row">
+              <div class="stat-box">
+                <label id="m1Lab">總數量</label>
+                <span id="m1Val">—</span>
+              </div>
+              <div class="stat-box">
+                <label id="m2Lab">總特徵</label>
+                <span id="m2Val">—</span>
+              </div>
+            </div>
+          </div>
+          <div class="story-text" id="story">正在接收迷宮數據...</div>
+          <div id="feedback"></div>
+        </div>
+
+        <div class="manualRow">
+          <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+            <div class="manualChip"><i class="fa-solid fa-keyboard"></i> 控制台：輸入數量並套用</div>
+            <div class="token-list" id="tokens"></div>
+          </div>
+          <div class="manualInputs">
+            <div class="mField">
+              <div class="mLabel"><span id="mAEmoji">A</span> <span id="mAName">物件A</span></div>
+              <input class="mInput" id="inpA" type="number" min="0" step="1" placeholder="數量">
+            </div>
+            <div class="mField">
+              <div class="mLabel"><span id="mBEmoji">B</span> <span id="mBName">物件B</span></div>
+              <input class="mInput" id="inpB" type="number" min="0" step="1" placeholder="數量">
+            </div>
+            <button class="btn-mini primary" id="btnApply"><i class="fa-solid fa-bolt"></i> 套用</button>
+            <button class="btn-mini" id="btnSync"><i class="fa-solid fa-rotate"></i> 同步</button>
+            <button class="btn-mini primary" id="btnCheck"><i class="fa-solid fa-microchip"></i> 驗證</button>
+          </div>
+        </div>
+
+        <div class="drop-zones">
+          <div class="zone" id="penA" data-kind="A">
+            <div class="zone-header">
+              <div class="zone-title"><span id="penAEmoji">A</span> <span id="penAName">物件A</span></div>
+              <div class="zone-count"><span id="countA">0</span></div>
+            </div>
+            <div class="items-container" id="insideA"></div>
+          </div>
+          <div class="zone" id="penB" data-kind="B">
+            <div class="zone-header">
+              <div class="zone-title"><span id="penBEmoji">B</span> <span id="penBName">物件B</span></div>
+              <div class="zone-count"><span id="countB">0</span></div>
+            </div>
+            <div class="items-container" id="insideB"></div>
+          </div>
+        </div>
+
+        <div class="actionRow">
+          <button class="btn-action" id="btnPause"><i class="fa-solid fa-pause"></i> <span id="pauseText">暫停</span></button>
+          <button class="btn-action" id="btnRestart"><i class="fa-solid fa-rotate-right"></i> 重新</button>
+          <a class="btn-action" href="https://jessiemath0703-chu.github.io/Game-Lobby/#g6-u9" target="_blank"><i class="fa-solid fa-list"></i> 回關卡主選單</a>
+          <button class="btn-action primary" id="btnWhiteboard"><i class="fa-solid fa-pen"></i> 計算白板</button>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="footer-pill">
+        <div class="footer-copy">© 2025–2026 Jessie Math 捷析老師. All rights reserved.</div>
+        <div class="footer-tagline">數學不迷路，捷析Jessie 帶你走向理解。</div>
+      </div>
+    </footer>
+  </div>
+
+  <div id="dragClone"><span id="cloneEmoji"></span><b id="cloneName"></b></div>
+
+  <button class="audio-btn" id="btnAudio" title="開啟/關閉音效">
+    <i class="fa-solid fa-volume-high"></i>
+  </button>
+
+  <div id="wbOverlay">
+    <canvas id="wbCanvas"></canvas>
+    <div class="wb-toolbar">
+      <button class="btn-action" id="wbClearBtn"><i class="fa-solid fa-eraser"></i> 清空</button>
+      <button class="btn-action primary" id="wbCloseBtn"><i class="fa-solid fa-xmark"></i> 關閉白板</button>
+    </div>
+  </div>
+
+  <div class="modalMask" id="nameMask">
+    <div class="modal">
+      <div class="modalTop">
+        <div class="modalBadge"><i class="fa-solid fa-radiation"></i></div>
+        <div class="modalTitle">倖存者分配</div>
+      </div>
+      
+      <div class="modalRules">
+        <strong>【任務目標】</strong><br>
+        迷宮中充滿危機，請利用「拖曳」或「直接輸入數字」，將正確的物資與人員數量分配到指定區域。<br><br>
+        <strong>【過關條件】</strong><br>
+        在 <strong>120 秒</strong> 內答對 <strong>7 題</strong> 以上，即可獲得迷宮專屬勳章！
+      </div>
+
+      <div>
+        <input class="nameInput" id="nameInput" type="text" maxlength="12" placeholder="請輸入你的代號..." autocomplete="off" />
+        <button class="startBtn" id="startBtn">進入迷宮</button>
+      </div>
+
+      <div class="lbContainer">
+        <div class="lbTitle"><i class="fa-solid fa-trophy"></i> 迷宮生存榜 (Top 10)</div>
+        <div id="lbBody"><div class="lbEmpty">尚無倖存者紀錄，成為第一人吧！</div></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+(() => {
+  const $ = s => document.querySelector(s);
+  const $$ = s => document.querySelectorAll(s);
+
+  const rInt = (a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+
+  /* ===== 迷宮生存題庫 ===== */
+  const THEMES = [
+    {
+      id: "mechs",
+      a: { key:"A", name:"偵察機甲", emoji:"🤖", unit:"台", each: 2, label:"2 足" },
+      b: { key:"B", name:"運輸機甲", emoji:"🦾", unit:"台", each: 4, label:"4 足" },
+      m1: "總機甲數", m2: "機械足總數",
+      story: (n, t2) => `迷宮基地有偵察機甲（每台 2 足）與運輸機甲（每台 4 足）共 <span class="k">${n}</span> 台，維修技師清點出共有 <span class="k">${t2}</span> 支機械足。請分配正確的數量。`
+    },
+    {
+      id: "batteries",
+      a: { key:"A", name:"基礎電池", emoji:"🔋", unit:"顆", each: 10, label:"10 晶體" },
+      b: { key:"B", name:"高階電池", emoji:"🪫", unit:"顆", each: 12, label:"12 晶體" },
+      m1: "電池總數", m2: "能量晶體總數",
+      story: (n, t2) => `倖存者分配到基礎電池（每顆 10 晶體）與高階電池（每顆 12 晶體）共 <span class="k">${n}</span> 顆，總共含有 <span class="k">${t2}</span> 單位能量晶體。請計算出兩種電池各有幾顆？`
+    },
+    {
+      id: "chips",
+      a: { key:"A", name:"小型晶片", emoji:"💾", unit:"片", each: 5, label:"5 核心" },
+      b: { key:"B", name:"大型晶片", emoji:"💽", unit:"片", each: 10, label:"10 核心" },
+      m1: "晶片總數", m2: "總算力核心",
+      story: (n, t2) => `破解迷宮大門需要小型晶片（每片 5 核心）與大型晶片（每片 10 核心）共 <span class="k">${n}</span> 片，系統顯示總算力為 <span class="k">${t2}</span> 核心。請還原兩種晶片的數量。`
+    },
+    {
+      id: "drones",
+      a: { key:"A", name:"輕型無人機", emoji:"🚁", unit:"台", each: 150, label:"載重 150g" },
+      b: { key:"B", name:"重型無人機", emoji:"🛸", unit:"台", each: 350, label:"載重 350g" },
+      m1: "無人機總數", m2: "總載重量(g)",
+      story: (n, t2) => `探索隊伍釋放了輕型無人機（每台載重 150g）與重型無人機（每台載重 350g）共 <span class="k">${n}</span> 台，探測總載重為 <span class="k">${t2}</span> 公克。請問兩種無人機各幾台？`
+    },
+    {
+      id: "rations",
+      a: { key:"A", name:"標準配給", emoji:"🥫", unit:"份", each: 200, label:"200 卡" },
+      b: { key:"B", name:"高級配給", emoji:"🍱", unit:"份", each: 250, label:"250 卡" },
+      m1: "配給總份數", m2: "總熱量(卡)",
+      story: (n, t2) => `補給站發放了標準配給（每份 200 卡）與高級配給（每份 250 卡）共 <span class="k">${n}</span> 份，總熱量為 <span class="k">${t2}</span> 卡路里。請分配正確的物資數量。`
+    }
+  ];
+
+  const GAME_SECONDS = 120;
+  const WIN_CONDITION = 7;
+  const SCORE_CORRECT = 100;
+  const SCORE_WRONG = -20;
+  const LB_KEY = "JM_G6_U9_LB_SURVIVOR";
+  const MAX_RENDER_ITEMS = 80;
+
+  let playerName = "";
+  let score = 0;
+  let correctCount = 0;
+  let timeLeft = GAME_SECONDS;
+  let timerId = null;
+  let started = false;
+  let ended = false;
+  let paused = false;
+
+  let themeQueue = [];
+  let isTransitioning = false;
+
+  let currentTheme = THEMES[0];
+  let puzzle = { n: 0, t2: 0, ansA: 0, ansB: 0 };
+  let placed = { A: 0, B: 0 };
+
+  /* ===== 音效系統 ===== */
+  const bgm = new Audio('1.mp3');
+  bgm.loop = true;
+  const sndWin = new Audio('2.mp3');
+  const sndLose = new Audio('3.mp3');
+  const sndCorrect = new Audio('4.mp3');
+
+  let isMuted = false;
+
+  if($("#btnAudio")) {
+    $("#btnAudio").onclick = () => {
+      isMuted = !isMuted;
+      $("#btnAudio i").className = isMuted ? "fa-solid fa-volume-xmark" : "fa-solid fa-volume-high";
+      bgm.muted = isMuted;
+      sndWin.muted = isMuted;
+      sndLose.muted = isMuted;
+      sndCorrect.muted = isMuted;
+    };
+  }
+
+  // 避免音效重疊
+  function stopAllSFX() {
+    sndCorrect.pause(); sndCorrect.currentTime = 0;
+    sndWin.pause(); sndWin.currentTime = 0;
+    sndLose.pause(); sndLose.currentTime = 0;
+  }
+
+  function playSFX(snd) {
+    if(isMuted) return;
+    stopAllSFX();
+    snd.play().catch(()=>{});
+  }
+
+  const elsToDisable = ["btnCheck", "btnApply", "btnSync", "inpA", "inpB", "btnRestart"];
+
+  function setScore(v){ score = v; $("#score").textContent = score; }
+  function setCorrectCount(v){ correctCount = v; $("#correctCountDisplay").textContent = `${correctCount} / ${WIN_CONDITION}`; }
+  function setTime(v){ timeLeft = Math.max(0, v); $("#timeLeft").textContent = timeLeft; }
+  function stopTimer(){ if(timerId){ clearInterval(timerId); timerId = null; } }
+
+  function loadLeaderboard(){
+    try{ const raw = localStorage.getItem(LB_KEY); return raw ? JSON.parse(raw) : []; }catch(e){ return []; }
+  }
+
+  function saveToLeaderboard(name, sc, usedSeconds, isPass){
+    const list = loadLeaderboard();
+    list.push({ name, score: sc, usedSeconds, pass: isPass, ts: Date.now() });
+    list.sort((a,b) => (b.score !== a.score) ? b.score - a.score : a.usedSeconds - b.usedSeconds);
+    localStorage.setItem(LB_KEY, JSON.stringify(list.slice(0, 50)));
+  }
+
+  function getRankIcon(idx) {
+    if(idx === 0) return "🥇";
+    if(idx === 1) return "🥈";
+    if(idx === 2) return "🥉";
+    return '<i class="fa-solid fa-medal" style="color:#d97706;"></i>';
+  }
+
+  function renderLeaderboard(){
+    const list = loadLeaderboard().slice(0, 10);
+    const body = $("#lbBody");
+    if(!list.length){ body.innerHTML = `<div class="lbEmpty">尚無紀錄，成為第一人吧！</div>`; return; }
+    body.innerHTML = `<div class="lbList">` + list.map((r, i) => `
+      <div class="lbRow">
+        <div class="lbRank">${getRankIcon(i)}</div>
+        <div class="lbName">${r.name}</div>
+        <div class="lbData">
+          <span>${r.score} 分</span>
+          <span style="font-size:0.8rem;">(${r.usedSeconds}s)</span>
+          <span class="lbPass ${r.pass ? 'success' : 'fail'}">${r.pass ? '過關' : '失敗'}</span>
+        </div>
+      </div>`).join("") + `</div>`;
+  }
+
+  function endGame(){
+    ended = true; started = false; paused = false; stopTimer();
+    const isPass = correctCount >= WIN_CONDITION;
+    
+    bgm.pause();
+    bgm.currentTime = 0;
+    if (isPass) {
+      playSFX(sndWin);
+    } else {
+      playSFX(sndLose);
+    }
+
+    if (isPass) { score += timeLeft * 2; setScore(score); }
+    
+    const usedTime = GAME_SECONDS - timeLeft;
+    saveToLeaderboard(playerName, score, usedTime, isPass);
+    
+    const fb = $("#feedback");
+    fb.className = ""; 
+    fb.style.display = "block";
+    
+    if (isPass) {
+      fb.className = "fb-success";
+      fb.innerHTML = `<h2>任務成功！存活確認！</h2>
+        <p>最終得分：${score} | 耗時：${usedTime}秒</p>
+        <img src="G6-U9.jpg" alt="過關勳章" style="max-width: 150px; border-radius: 10px; margin-top:10px; border:2px solid #10b981;">
+        <br><button class="btn-action primary" style="margin-top:15px;" onclick="location.reload()">重新挑戰</button>`;
+    } else {
+      fb.className = "fb-error";
+      fb.innerHTML = `<h2>任務失敗</h2>
+        <p>答對 ${correctCount} 題，未能達到要求 (需 ${WIN_CONDITION} 題)。</p>
+        <br><button class="btn-action" style="margin-top:10px;" onclick="location.reload()">返回大廳</button>`;
+    }
+
+    $("#btnPause").disabled = true;
+    elsToDisable.forEach(id => { if($("#" + id)) $("#" + id).disabled = true; });
+    $$(".token").forEach(t => t.style.pointerEvents = "none");
+  }
+
+  function tick(){
+    if(paused || ended || !started) return;
+    setTime(timeLeft - 1);
+    if(timeLeft <= 0) endGame();
+  }
+
+  function startGame(){
+    started = true; ended = false; paused = false; isTransitioning = false;
+    setScore(0); setCorrectCount(0); setTime(GAME_SECONDS);
+    themeQueue = [];
+    
+    $("#pauseText").textContent = "暫停";
+    $("#btnPause i").className = "fa-solid fa-pause";
+    $("#btnPause").disabled = false;
+    elsToDisable.forEach(id => { if($("#" + id)) $("#" + id).disabled = false; });
+    
+    stopTimer();
+    timerId = setInterval(tick, 1000);
+  }
+
+  function makePuzzle(t){
+    const n = rInt(8, 20);
+    const ansA = rInt(1, n-1);
+    const ansB = n - ansA;
+    const t2 = ansA * t.a.each + ansB * t.b.each;
+    return { n, t2, ansA, ansB };
+  }
+
+  function renderInside(kind){
+    const container = kind === "A" ? $("#insideA") : $("#insideB");
+    const emoji = kind === "A" ? currentTheme.a.emoji : currentTheme.b.emoji;
+    container.innerHTML = "";
+
+    const count = placed[kind];
+    const show = Math.min(count, MAX_RENDER_ITEMS);
+
+    for(let i=0;i<show;i++){
+      const item = document.createElement("div");
+      item.className = "mini-item";
+      item.textContent = emoji;
+      item.onclick = () => { if(!started || ended || paused || isTransitioning) return; item.remove(); placed[kind]--; updateCounts(); syncInputsFromPlaced(); };
+      container.appendChild(item);
+    }
+    if(count > MAX_RENDER_ITEMS){
+      const hint = document.createElement("div");
+      hint.className = "mini-item"; hint.style.width = "auto"; hint.style.padding = "0 8px";
+      hint.textContent = `+${count - MAX_RENDER_ITEMS}`;
+      container.appendChild(hint);
+    }
+  }
+
+  function initPuzzle() {
+    if (themeQueue.length === 0) {
+      themeQueue = [...THEMES];
+      for (let i = themeQueue.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [themeQueue[i], themeQueue[j]] = [themeQueue[j], themeQueue[i]];
+      }
+    }
+    currentTheme = themeQueue.pop();
+    
+    const t = currentTheme;
+    puzzle = makePuzzle(t);
+    placed = { A: 0, B: 0 }; 
+
+    $("#story").innerHTML = t.story(puzzle.n, puzzle.t2);
+    $("#m1Lab").textContent = t.m1; $("#m2Lab").textContent = t.m2;
+    $("#m1Val").textContent = puzzle.n; $("#m2Val").textContent = puzzle.t2;
+
+    $("#penAName").textContent = t.a.name; $("#penBName").textContent = t.b.name;
+    $("#penAEmoji").textContent = t.a.emoji; $("#penBEmoji").textContent = t.b.emoji;
+    $("#mAName").textContent = t.a.name; $("#mBName").textContent = t.b.name;
+    $("#mAEmoji").textContent = t.a.emoji; $("#mBEmoji").textContent = t.b.emoji;
+    
+    // 強制清除回饋狀態，保證每次進新題畫面絕對乾淨
+    const fb = $("#feedback");
+    fb.className = "";
+    fb.style.display = "none";
+    fb.innerHTML = "";
+    
+    updateCounts(); 
+    renderInside("A"); 
+    renderInside("B");
+    syncInputsFromPlaced(); 
+    renderTokens();
+  }
+
+  function renderTokens() {
+    const container = $("#tokens");
+    container.innerHTML = "";
+    [currentTheme.a, currentTheme.b].forEach(item => {
+      const div = document.createElement("div");
+      div.className = "token";
+      div.innerHTML = `<div class="token-icon">${item.emoji}</div><div class="token-info"><b>${item.name}</b></div>`;
+      setupDrag(div, item);
+      container.appendChild(div);
+    });
+    if(!started || paused) $$(".token").forEach(t => t.style.pointerEvents = "none");
+  }
+
+  /* 拖拉邏輯 */
+  let rafId = null;
+  const moveState = { x: -9999, y: -9999, zone: null };
+  const getZoneUnderPoint = (x, y) => document.elementFromPoint(x, y)?.closest(".zone");
+
+  function rafTick(){
+    rafId = null;
+    $("#dragClone").style.transform = `translate3d(${moveState.x + 15}px, ${moveState.y + 15}px, 0)`;
+    $$(".zone").forEach(z => z.classList.remove("hover"));
+    if(moveState.zone) moveState.zone.classList.add("hover");
+  }
+
+  function setupDrag(el, item) {
+    let isDragging = false;
+    el.addEventListener("touchstart", (e)=>{ if(started && !ended && !isTransitioning) e.preventDefault(); }, { passive:false });
+
+    el.addEventListener("pointerdown", (e) => {
+      if(!started || ended || paused || isTransitioning) return;
+      e.preventDefault(); isDragging = true; el.setPointerCapture(e.pointerId);
+      $("#cloneEmoji").textContent = item.emoji; $("#cloneName").textContent = item.name;
+      $("#dragClone").style.opacity = "1";
+      moveState.x = e.clientX; moveState.y = e.clientY; moveState.zone = getZoneUnderPoint(e.clientX, e.clientY);
+      if(!rafId) rafId = requestAnimationFrame(rafTick);
+    });
+
+    el.addEventListener("pointermove", (e) => {
+      if(!isDragging) return;
+      moveState.x = e.clientX; moveState.y = e.clientY; moveState.zone = getZoneUnderPoint(e.clientX, e.clientY);
+      if(!rafId) rafId = requestAnimationFrame(rafTick);
+    });
+
+    el.addEventListener("pointerup", (e) => {
+      if(!isDragging) return;
+      isDragging = false; $("#dragClone").style.opacity = "0";
+      const zone = getZoneUnderPoint(e.clientX, e.clientY);
+      if(zone) addItem(zone.dataset.kind);
+      $$(".zone").forEach(z => z.classList.remove("hover"));
+    });
+  }
+
+  function addItem(kind) {
+    if(!started || ended || paused || isTransitioning) return;
+    placed[kind]++; updateCounts(); renderInside(kind); syncInputsFromPlaced();
+  }
+
+  function updateCounts() { $("#countA").textContent = placed.A; $("#countB").textContent = placed.B; }
+
+  /* 輸入邏輯 */
+  function clampInt(v){ const n = Number(v); return (!Number.isFinite(n)) ? 0 : Math.max(0, Math.floor(n)); }
+  function syncInputsFromPlaced(){ 
+    $("#inpA").value = placed.A === 0 ? "" : placed.A; 
+    $("#inpB").value = placed.B === 0 ? "" : placed.B; 
+  }
+  function applyInputsToPlaced(){
+    if(!started || ended || paused || isTransitioning) return;
+    placed.A = clampInt($("#inpA").value); placed.B = clampInt($("#inpB").value);
+    updateCounts(); renderInside("A"); renderInside("B");
+  }
+
+  if($("#btnApply")) $("#btnApply").onclick = applyInputsToPlaced;
+  if($("#btnSync")) $("#btnSync").onclick = syncInputsFromPlaced;
+  if($("#inpA")) $("#inpA").addEventListener("keydown", (e)=>{ if(e.key==="Enter") applyInputsToPlaced(); });
+  if($("#inpB")) $("#inpB").addEventListener("keydown", (e)=>{ if(e.key==="Enter") applyInputsToPlaced(); });
+
+  /* 遊戲按鈕 */
+  if($("#btnCheck")) $("#btnCheck").onclick = () => {
+    if(!started || ended || paused || isTransitioning) return;
+
+    // 將輸入框的數字同步到 placed
+    placed.A = clampInt($("#inpA").value);
+    placed.B = clampInt($("#inpB").value);
+    updateCounts();
+    renderInside("A");
+    renderInside("B");
+
+    isTransitioning = true; 
+    
+    const isCorrect = placed.A === puzzle.ansA && placed.B === puzzle.ansB;
+    const fb = $("#feedback");
+    fb.className = "";
+    fb.style.display = "block";
+    
+    if (isCorrect) {
+      playSFX(sndCorrect);
+      
+      fb.className = "fb-success"; fb.innerHTML = "<i class='fa-solid fa-check'></i> 數據正確，分配成功！";
+      setScore(score + SCORE_CORRECT);
+      setCorrectCount(correctCount + 1);
+      setTimeout(() => {
+        isTransitioning = false;
+        if(ended) return;
+        initPuzzle(); 
+      }, 1200);
+    } else {
+      fb.className = "fb-error";
+      fb.innerHTML = `<i class='fa-solid fa-xmark'></i> 系統警告：分配錯誤！<br><span style="font-size:0.9rem;">(正確應為：${currentTheme.a.name} ${puzzle.ansA}、${currentTheme.b.name} ${puzzle.ansB})</span>`;
+      setScore(Math.max(0, score + SCORE_WRONG));
+      setTimeout(() => { 
+        isTransitioning = false;
+        if(!ended) { initPuzzle(); } 
+      }, 2000);
+    }
+  };
+
+  // 重新本局遊戲
+  if($("#btnRestart")) $("#btnRestart").onclick = () => {
+    if(!playerName || ended) return;
+    isTransitioning = false;
+    bgm.currentTime = 0;
+    if(!isMuted) bgm.play().catch(()=>{});
+    startGame();
+    initPuzzle();
+  };
+
+  if($("#btnPause")) $("#btnPause").onclick = () => {
+    if(!started || ended) return;
+    paused = !paused;
+    $("#pauseText").textContent = paused ? "繼續" : "暫停";
+    $("#btnPause i").className = paused ? "fa-solid fa-play" : "fa-solid fa-pause";
+    $$(".token").forEach(t => t.style.pointerEvents = paused ? "none" : "auto");
+    elsToDisable.forEach(id => { if($("#" + id)) $("#" + id).disabled = paused; });
+    
+    if (paused) {
+      bgm.pause();
+    } else if (!isMuted) {
+      bgm.play().catch(()=>{});
+    }
+  };
+
+  /* ===== 計算白板功能 ===== */
+  const wbOverlay = document.getElementById('wbOverlay');
+  const wbCanvas = document.getElementById('wbCanvas');
+  const wbCtx = wbCanvas.getContext('2d');
+  let isDrawing = false;
+
+  function resizeWb() {
+    if(wbCanvas) {
+      wbCanvas.width = window.innerWidth;
+      wbCanvas.height = window.innerHeight;
+    }
+  }
+  window.addEventListener('resize', resizeWb);
+  resizeWb();
+
+  if(wbCanvas) {
+    wbCanvas.addEventListener('pointerdown', e => {
+      isDrawing = true;
+      wbCtx.beginPath();
+      wbCtx.moveTo(e.clientX, e.clientY);
+    });
+    wbCanvas.addEventListener('pointermove', e => {
+      if(!isDrawing) return;
+      wbCtx.lineTo(e.clientX, e.clientY);
+      wbCtx.strokeStyle = '#ef4444';
+      wbCtx.lineWidth = 4;
+      wbCtx.lineCap = 'round';
+      wbCtx.stroke();
+    });
+    window.addEventListener('pointerup', () => isDrawing = false);
+    window.addEventListener('pointercancel', () => isDrawing = false);
+  }
+
+  if(document.getElementById('btnWhiteboard')) {
+    document.getElementById('btnWhiteboard').onclick = () => {
+      wbOverlay.style.display = 'block';
+      resizeWb();
+    };
+  }
+  if(document.getElementById('wbCloseBtn')) {
+    document.getElementById('wbCloseBtn').onclick = () => {
+      wbOverlay.style.display = 'none';
+    };
+  }
+  if(document.getElementById('wbClearBtn')) {
+    document.getElementById('wbClearBtn').onclick = () => {
+      wbCtx.clearRect(0, 0, wbCanvas.width, wbCanvas.height);
+    };
+  }
+
+  /* 登入與開始 */
+  function commitName(){
+    const v = ($("#nameInput").value || "").trim();
+    if(!v){ alert("請輸入代號以進入迷宮！"); return; }
+    playerName = v;
+    $("#playerNameBar").textContent = playerName;
+    $("#nameMask").style.display = "none";
+    
+    if(!isMuted) bgm.play().catch((e)=>{ console.log("音效自動播放被瀏覽器阻擋", e); });
+
+    startGame();
+    initPuzzle();
+  }
+
+  if($("#startBtn")) $("#startBtn").onclick = commitName;
+  if($("#nameInput")) $("#nameInput").onkeydown = (e) => { if(e.key === "Enter") commitName(); };
+
+  // 初始化
+  renderLeaderboard();
+})();
+</script>
+</body>
+</html>
